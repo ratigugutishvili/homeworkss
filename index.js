@@ -62,11 +62,11 @@
 // // DAVALEBA 1 
 
 
-// // const moment = require('moment')
+// const moment = require('moment')
 
 
 
-// // console.log(moment("20230910", "YYYYMMDD").from("20230616", "YYYYMMDD"));
+// console.log(moment("20230910", "YYYYMMDD").from("20230616", "YYYYMMDD"));
 
 
 
@@ -114,3 +114,78 @@
 // app.get("/rati", (req, res)=>{
 //     res.end('rameee')
 // })
+
+const program = require('commander')
+const moment = require('moment')
+const {writeFile} = require('fs')
+const {readFile} = require('fs')
+
+
+program
+.option('-amount <char>')
+.option('-type <char>')
+.option('-category <char>')
+.option('-delete <char>')
+.option('-search <char>')
+
+program.parse()
+const options = {amount: program.opts().Amount, type:program.opts().Type,category:program.opts().Category}
+const finale = {...options,date: moment().format('MMMM Do YYYY, h:mm:ss a'),id: Date.now()}
+readFile('rame.json', 'utf8', function(err, data)
+{
+    if(program.opts().Amount !== undefined){
+        if(err)
+        {
+            const finalarr = [finale]
+            writeFile('rame.json', JSON.stringify(finalarr),function(err){
+                if(err)
+                {
+                    console.log('failed');
+                }
+                console.log('done');
+            })
+            return
+        }
+        setTimeout(function(){
+            const maindata = JSON.parse(data)
+            writeFile('rame.json', JSON.stringify(maindata.concat(finale)),function(err){
+                if(err)
+                {
+                    console.log('failed');
+                }
+                console.log('done');
+            })
+        },1000)
+    }
+})
+
+
+readFile('rame.json', 'utf8', function(err, data){
+    if(err){
+        console.log('object doesnt exist');
+        return
+    }
+    const finaldata = JSON.parse(data)
+    const objectweneed = finaldata.filter((el)=>{
+        return el.id !=  program.opts().Delete
+    })
+    writeFile('rame.json', JSON.stringify(objectweneed), function(err){
+        if(err){
+            console.log('ERORR');
+        }
+        console.log('DONEE');
+    })
+})
+
+
+readFile('rame.json', 'utf8', function(err,data){
+    if (data !== undefined) {
+        const maindata = JSON.parse(data)
+        if (program.opts().Search !== undefined) {
+            const filtered = maindata.filter((el)=>{
+                return Object.values(el).includes(program.opts().Search);
+            })
+            console.log(filtered);
+        }
+    }
+})
